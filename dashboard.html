@@ -908,14 +908,25 @@
   let currentUser = null, currentConfig = {};
 
   // ─── BOOT ─────────────────────────────────────────────────────────────────────
-  async function init() {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) { currentUser = session.user; await bootApp(); }
-      else showLogin();
-    } catch(e) { showLogin(); }
-    hideLoader();
-  }
+ // ─── BOOT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // Gérer le callback de confirmation email (fragment #access_token dans l'URL)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+      if (!currentUser) {
+        currentUser = session.user;
+        hideLoader();
+        await bootApp();
+      }
+    }
+  });
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { currentUser = session.user; hideLoader(); await bootApp(); }
+    else { hideLoader(); showLogin(); }
+  } catch(e) { hideLoader(); showLogin(); }
+}
 
   function hideLoader() {
     const l = document.getElementById('page-loader');
