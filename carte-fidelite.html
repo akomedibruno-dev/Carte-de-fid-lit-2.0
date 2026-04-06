@@ -349,6 +349,7 @@
 
 <script>
   const EDGE_FUNCTION_URL = "https://yfjgazlosxjcoheinrni.supabase.co/functions/v1/create-pass";
+  const SUPABASE_URL      = "https://yfjgazlosxjcoheinrni.supabase.co";
   const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlmamdhemxvc3hqY29oZWlucm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDY3NTAsImV4cCI6MjA5MDYyMjc1MH0.Nb5C5Eq1ttvo7UeD_tOHgkMweoQIfi4xovxmVN-sa6k";
 
   // ── 1. Lecture du merchant_id dans l'URL (?merchant=<uuid>)
@@ -359,9 +360,25 @@
     // Pas de merchant_id → affiche l'état erreur
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
     document.getElementById('state-error').classList.add('active');
+  } else {
+    // ── 2. Fetch du nom du marchand depuis Supabase
+    fetch(`${SUPABASE_URL}/rest/v1/merchants?id=eq.${merchantId}&select=shop_name`, {
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      const name = data?.[0]?.shop_name;
+      document.getElementById('display-merchant').textContent = name || 'Carte de fidélité';
+    })
+    .catch(() => {
+      document.getElementById('display-merchant').textContent = 'Carte de fidélité';
+    });
   }
 
-  // ── 2. Helpers UI
+  // ── 3. Helpers UI
   function showState(id) {
     document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
     document.getElementById('state-' + id).classList.add('active');
@@ -377,7 +394,7 @@
     document.getElementById('error-msg').classList.remove('visible');
   }
 
-  // ── 3. Soumission
+  // ── 4. Soumission
   async function submitForm() {
     if (!merchantId) return;
     hideError();
