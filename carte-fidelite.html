@@ -362,7 +362,7 @@
     document.getElementById('state-error').classList.add('active');
   } else {
     // ── 2. Fetch du nom du marchand depuis Supabase
-    fetch(`${SUPABASE_URL}/rest/v1/merchants?id=eq.${merchantId}&select=shop_name`, {
+    fetch(`${SUPABASE_URL}/rest/v1/public_merchants?id=eq.${merchantId}&select=shop_name`, {
       headers: {
         'apikey': ANON_KEY,
         'Authorization': 'Bearer ' + ANON_KEY
